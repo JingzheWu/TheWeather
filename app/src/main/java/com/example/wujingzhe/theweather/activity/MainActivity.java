@@ -13,13 +13,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.wujingzhe.theweather.R;
+import com.example.wujingzhe.theweather.service.AutoUpdateService;
 import com.example.wujingzhe.theweather.util.Handle;
 import com.example.wujingzhe.theweather.util.HttpCallbackListener;
 import com.example.wujingzhe.theweather.util.HttpUtil;
 
 import java.util.Date;
 
-public class MainActivity extends Activity implements View.OnClickListener{
+public class MainActivity extends BaseActivity implements View.OnClickListener{
 
     private Button refresh;
     private Button add;
@@ -33,8 +34,9 @@ public class MainActivity extends Activity implements View.OnClickListener{
     private long deltaTime;
     private static final long AN_HOUR=1000*3600;
     private Boolean isRefresh=false;
-
     private Boolean isFromSearchActivity;
+    private String count0Save;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +47,47 @@ public class MainActivity extends Activity implements View.OnClickListener{
         add= (Button) findViewById(R.id.plus_sign);
         developerInfo= (Button) findViewById(R.id.developer_info);
 
+
+        SharedPreferences pref=PreferenceManager.getDefaultSharedPreferences(this);
+        String cityName=pref.getString("city_name",null);
+        firstCityName=cityName;
+        String address="http://api.map.baidu.com/telematics/v3/weather?location="
+                +firstCityName+"&output=json&ak=1hpsNcYGhaHVgcxa64aGBGDCaPzxEH7b&mcode="
+                +"08:61:5A:97:AA:83:DF:D8:84:02:5B:2C:30:07:E9:5C:E2:E4:DC:90"
+                +";com.example.wujingzhe";
+        HttpUtil.sendHttpRequest(address, new HttpCallbackListener() {
+            @Override
+            public void onFinish(String response) {
+                count0Save=Handle.handleWeatherResponse0(MainActivity.this,response);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!isFromSearchActivity){
+                            firstCity.setText(count0Save);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+        });
+
         String weatherInfo0=getIntent().getStringExtra("weather_info");//weatherInfo0是简略天气信息
         //判断是否是从SearchActivity中跳转过来的，得不到值则取默认值，即第二个参数false
         isFromSearchActivity=getIntent().getBooleanExtra("from_search_activity",false);
+
         if (isFromSearchActivity){
             String[] Info0=weatherInfo0.split("\n");
             firstCityName=Info0[0];
+            Intent i=new Intent(this, AutoUpdateService.class);
+            startService(i);
+            firstCity.setText(weatherInfo0);
         }
+
+
         firstCity.setText(weatherInfo0);
         firstCity.setOnClickListener(this);
         add.setOnClickListener(this);
@@ -64,14 +100,15 @@ public class MainActivity extends Activity implements View.OnClickListener{
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.first_city:
-                if (isFromSearchActivity){
+                if (isFromSearchActivity||(firstCityName!=null)){
                     previousClick=currentClick;
                     currentClick=(new Date()).getTime();
                     deltaTime=currentClick-previousClick;
                     if (deltaTime>AN_HOUR||isRefresh){
                         isRefresh=false;
+                        String address;
                         showProgressDialog();
-                        String address="http://api.map.baidu.com/telematics/v3/weather?location="
+                        address="http://api.map.baidu.com/telematics/v3/weather?location="
                                 +firstCityName+"&output=json&ak=1hpsNcYGhaHVgcxa64aGBGDCaPzxEH7b&mcode="
                                 +"08:61:5A:97:AA:83:DF:D8:84:02:5B:2C:30:07:E9:5C:E2:E4:DC:90"
                                 +";com.example.wujingzhe";
@@ -100,7 +137,8 @@ public class MainActivity extends Activity implements View.OnClickListener{
             case R.id.refresh:
                 isRefresh=true;
                 showProgressDialog();
-                String address="http://api.map.baidu.com/telematics/v3/weather?location="
+                String address;
+                address="http://api.map.baidu.com/telematics/v3/weather?location="
                         +firstCityName+"&output=json&ak=1hpsNcYGhaHVgcxa64aGBGDCaPzxEH7b&mcode="
                         +"08:61:5A:97:AA:83:DF:D8:84:02:5B:2C:30:07:E9:5C:E2:E4:DC:90"
                         +";com.example.wujingzhe";
@@ -162,5 +200,10 @@ public class MainActivity extends Activity implements View.OnClickListener{
         intent.putExtra("detail_info",count);
         intent.putExtra("first_city_name",cityName);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        ActivityCollector.finishAll();
     }
 }

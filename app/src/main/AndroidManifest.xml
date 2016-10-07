@@ -19,7 +19,13 @@
         </activity>
         <activity android:name=".activity.DetailInfoActivity" />
         <activity android:name=".activity.SearchActivity" />
-        <activity android:name=".activity.DeveloperInfoActivity"></activity>
+        <activity android:name=".activity.DeveloperInfoActivity" />
+
+        <service android:name=".service.AutoUpdateService" />
+
+        <receiver android:name=".receiver.AutoUpdateReceiver" />
+
+        <activity android:name=".activity.BaseActivity"></activity>
     </application>
 
 </manifest>

@@ -14,7 +14,7 @@ import com.example.wujingzhe.theweather.util.Handle;
 import com.example.wujingzhe.theweather.util.HttpCallbackListener;
 import com.example.wujingzhe.theweather.util.HttpUtil;
 
-public class SearchActivity extends Activity implements View.OnClickListener{
+public class SearchActivity extends BaseActivity implements View.OnClickListener{
 
     private Button back;
     private Button search;

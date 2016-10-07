@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.example.wujingzhe.theweather.R;
 
-public class DetailInfoActivity extends Activity {
+public class DetailInfoActivity extends BaseActivity {
 
     private Button detailBack;
     private TextView titleText;

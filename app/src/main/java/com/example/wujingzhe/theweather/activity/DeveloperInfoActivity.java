@@ -8,7 +8,7 @@ import android.widget.Button;
 
 import com.example.wujingzhe.theweather.R;
 
-public class DeveloperInfoActivity extends Activity {
+public class DeveloperInfoActivity extends BaseActivity {
 
     private Button developerInfoBack;
     @Override
